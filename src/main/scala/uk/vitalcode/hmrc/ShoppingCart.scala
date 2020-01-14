@@ -1,9 +1,25 @@
 package uk.vitalcode.hmrc
 
-case class ShoppingCart(appleCostEngine: AppleCostEngine, orangeCostEngine: OrangeCostEngine) {
+import uk.vitalcode.hmrc.CostEngine._
+
+case class ShoppingCart(costEngines: List[CostEngine] = Nil) {
+
+  private val defaultCostEngines = defaultAppleCost :: defaultOrangeCost :: Nil
+
   def cost(products: List[ShopProduct]): BigDecimal = {
-    val appleCost = appleCostEngine.cost(products.collect { case a: Apple.type => a })
-    val orangeCost = orangeCostEngine.cost(products.collect { case o: Orange.type => o })
-    appleCost + orangeCost
+
+    def totalCost(cost: BigDecimal, products: List[ShopProduct]): BigDecimal = {
+
+      val combinedCostEngines = costEngines ++ defaultCostEngines
+      val combinedCostFn = combinedCostEngines.tail.foldLeft(combinedCostEngines.head.cost)((acc, e) => acc orElse e.cost)
+      val costResult = combinedCostFn(cost, products.sortBy(_.toString))
+
+      costResult match {
+        case (c, Nil) => c
+        case (c, l) => totalCost(c, l)
+      }
+    }
+
+    totalCost(0, products)
   }
 }
