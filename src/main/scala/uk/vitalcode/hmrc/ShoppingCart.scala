@@ -1,12 +1,9 @@
 package uk.vitalcode.hmrc
 
-object ShoppingCart {
-  private val appleUnitCost = BigDecimal(0.60)
-  private val orangeUnitCost = BigDecimal(0.25)
-
+case class ShoppingCart(appleCostEngine: AppleCostEngine, orangeCostEngine: OrangeCostEngine) {
   def cost(products: List[ShopProduct]): BigDecimal = {
-    val appleCost = products.count(_ == Apple) * appleUnitCost
-    val orangeCost = products.count(_ == Orange) * orangeUnitCost
+    val appleCost = appleCostEngine.cost(products.collect { case a: Apple.type => a })
+    val orangeCost = orangeCostEngine.cost(products.collect { case o: Orange.type => o })
     appleCost + orangeCost
   }
 }
