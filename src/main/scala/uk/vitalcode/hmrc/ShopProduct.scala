@@ -1,6 +1,6 @@
 package uk.vitalcode.hmrc
 
-sealed abstract class ShopProduct
+sealed trait ShopProduct
 
 case object Orange extends ShopProduct
 
